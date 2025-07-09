@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/art_items.dart';
 import '../widgets/art_card.dart';
 
@@ -23,23 +24,19 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
         ? artCollection
         : artCollection.where((item) => item.category == _selectedCategory).toList();
 
+    // Determine columns based on platform
+    final crossAxisCount = kIsWeb ? 4 : 2;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chinese Art Gallery'),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 26,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1,
-          fontFamily: 'Serif',
-        ),
       ),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/others/rice_paper_texture.jpg'),
             fit: BoxFit.cover,
-            opacity: 1,
+            opacity: 0.3,
           ),
         ),
         child: Column(
@@ -50,8 +47,8 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
                     childAspectRatio: 0.75,
@@ -80,26 +77,18 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
           final isSelected = _selectedCategory == category;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                chipTheme: Theme.of(context).chipTheme.copyWith(
-                      selectedColor: const Color(0xFF8B0000),
-                      secondarySelectedColor: const Color(0xFF8B0000),
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : const Color(0xFF5C3A21),
-                      ),
-                      checkmarkColor: Colors.white,
-                    ),
+            child: ChoiceChip(
+              label: Text(category),
+              selected: isSelected,
+              onSelected: (_) => setState(() => _selectedCategory = category),
+              backgroundColor: const Color(0xFFF0E6D6),
+              selectedColor: const Color(0xFF8B0000),
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : const Color(0xFF5C3A21),
               ),
-              child: ChoiceChip(
-                label: Text(category),
-                selected: isSelected,
-                onSelected: (_) => setState(() => _selectedCategory = category),
-                backgroundColor: const Color(0xFFF0E6D6),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: const BorderSide(color: Color(0xFFD9C7B8)),
-                ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: Color(0xFFD9C7B8)),
               ),
             ),
           );

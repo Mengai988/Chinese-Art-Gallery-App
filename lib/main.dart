@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'models/art_items.dart';
 import 'pages/art_gallery_page.dart';
+import 'pages/art_detail_page.dart';
 
 void main() {
   runApp(const ChineseArtGalleryApp());
@@ -12,32 +14,41 @@ class ChineseArtGalleryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Chinese Art Gallery',
-      debugShowCheckedModeBanner: false, //关闭右上角的“debug”调试标识
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF8B0000),
-          brightness: Brightness.light,
-        ),
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          margin: const EdgeInsets.all(8),
-        ),
-        appBarTheme: const AppBarTheme(
-          color: Color(0xFF8B0000),
-          elevation: 0,
-          centerTitle: true,
-          titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: _buildThemeData(),
       home: const ArtGalleryPage(),
+      routes: {
+        '/detail': (context) {
+          final item = ModalRoute.of(context)!.settings.arguments as ArtItem;
+          return ArtDetailPage(item: item);
+        },
+      },
+    );
+  }
+
+  ThemeData _buildThemeData() {
+    const Color richRed = Color(0xFF8B0000);
+    
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: richRed,
+        brightness: Brightness.light,
+        primary: richRed,
+        secondary: const Color(0xFFD32F2F),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF8B0000),
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 26,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+          letterSpacing: 1,
+          fontFamily: 'Serif',
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
     );
   }
 }
