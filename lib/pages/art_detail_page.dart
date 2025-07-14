@@ -11,19 +11,21 @@ class ArtDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text(item.title),
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: const Color(0xFF8B0000),
         titleTextStyle: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w300,
           color: Colors.white,
-          fontSize: 25,
-          fontWeight: FontWeight.bold,
+          letterSpacing: 1,
+          fontFamily: 'Serif',
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // In your GestureDetector widget:
             GestureDetector(
               onTap: () => Navigator.of(context).push(_buildFullImageRoute(item.fullImagePath)),
               child: Hero(
@@ -43,11 +45,11 @@ class ArtDetailPage extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: SizedBox(
-                      width: 300, // Fixed width
-                      height: 300, // Fixed height
+                      width: 300,
+                      height: 300,
                       child: Image.asset(
                         item.thumbnailPath,
-                        fit: BoxFit.cover, // This will ensure the image covers the space while maintaining aspect ratio
+                        fit: BoxFit.cover,
                         errorBuilder: (ctx, error, stackTrace) => Container(
                           height: 300,
                           color: Colors.grey[200],
@@ -112,7 +114,6 @@ class ArtDetailPage extends StatelessWidget {
     );
   }
 
-  /// 创建带模糊背景 + 淡入动画的路由
   Route _buildFullImageRoute(String imagePath) {
     return PageRouteBuilder(
       opaque: false,
@@ -121,13 +122,11 @@ class ArtDetailPage extends StatelessWidget {
         return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Scaffold(
-            // ignore: deprecated_member_use
             backgroundColor: Colors.black.withOpacity(0.5),
             body: Stack(
               children: [
                 BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  // ignore: deprecated_member_use
                   child: Container(color: Colors.black.withOpacity(0.5)),
                 ),
                 Center(
@@ -142,7 +141,11 @@ class ArtDetailPage extends StatelessWidget {
                         child: Image.asset(
                           imagePath,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 100, color: Colors.white),
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.broken_image,
+                            size: 100,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),

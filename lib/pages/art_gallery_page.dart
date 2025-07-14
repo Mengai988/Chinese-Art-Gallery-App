@@ -36,7 +36,7 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
           image: DecorationImage(
             image: AssetImage('assets/images/others/rice_paper_texture.jpg'),
             fit: BoxFit.cover,
-            opacity: 0.3,
+            opacity: 0.7,
           ),
         ),
         child: Column(
@@ -67,32 +67,45 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
   }
 
   Widget _buildCategoryFilter() {
-    return SizedBox(
-      height: 60,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _availableCategories.length,
-        itemBuilder: (context, index) {
-          final category = _availableCategories[index];
-          final isSelected = _selectedCategory == category;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12),
-            child: ChoiceChip(
-              label: Text(category),
-              selected: isSelected,
-              onSelected: (_) => setState(() => _selectedCategory = category),
-              backgroundColor: const Color(0xFFF0E6D6),
-              selectedColor: const Color(0xFF8B0000),
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFF5C3A21),
+    return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 1.5),
+    child: Center(
+      child: Wrap( // Wrap 自动换行，居中布局比 ListView 更适合少量按钮
+        alignment: WrapAlignment.center,
+        spacing: 8, // 按钮之间的间距
+          children: _availableCategories.map((category) {
+            final isSelected = _selectedCategory == category;
+
+            return GestureDetector(
+              onTap: () => setState(() => _selectedCategory = category),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF8B0000) : const Color(0xFFF0E6D6),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFD9C7B8)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      category,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : const Color(0xFF5C3A21),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 6),
+                      const Icon(Icons.check, color: Colors.white, size: 18),
+                    ]
+                  ],
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: const BorderSide(color: Color(0xFFD9C7B8)),
-              ),
-            ),
-          );
-        },
+            );
+          }).toList(),
+        ),
       ),
     );
   }

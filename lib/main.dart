@@ -19,8 +19,14 @@ class ChineseArtGalleryApp extends StatelessWidget {
       home: const ArtGalleryPage(),
       routes: {
         '/detail': (context) {
-          final item = ModalRoute.of(context)!.settings.arguments as ArtItem;
-          return ArtDetailPage(item: item);
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is ArtItem) {
+            return ArtDetailPage(item: args);
+          } else {
+            return const Scaffold(
+              body: Center(child: Text("Invalid item")),
+            );
+          }
         },
       },
     );
@@ -28,7 +34,7 @@ class ChineseArtGalleryApp extends StatelessWidget {
 
   ThemeData _buildThemeData() {
     const Color richRed = Color(0xFF8B0000);
-    
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
@@ -37,17 +43,19 @@ class ChineseArtGalleryApp extends StatelessWidget {
         primary: richRed,
         secondary: const Color(0xFFD32F2F),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF8B0000),
+      appBarTheme: AppBarTheme(
+        backgroundColor: richRed,
         centerTitle: true,
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           fontSize: 26,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w300,
           color: Colors.white,
           letterSpacing: 1,
           fontFamily: 'Serif',
         ),
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
       ),
     );
   }
