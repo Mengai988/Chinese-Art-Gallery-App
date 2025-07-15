@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/art_items.dart';
 import '../widgets/art_card.dart';
 
@@ -24,9 +23,6 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
         ? artCollection
         : artCollection.where((item) => item.category == _selectedCategory).toList();
 
-    // Determine columns based on platform
-    final crossAxisCount = kIsWeb ? 4 : 2;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chinese Art Gallery'),
@@ -47,11 +43,11 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 300, // 每列最大宽度
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
-                    childAspectRatio: 0.75,
+                    childAspectRatio: 0.8, // 可调节比例
                   ),
                   itemCount: filteredItems.length,
                   itemBuilder: (context, index) {
@@ -68,11 +64,11 @@ class _ArtGalleryPageState extends State<ArtGalleryPage> {
 
   Widget _buildCategoryFilter() {
     return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 1.5),
-    child: Center(
-      child: Wrap( // Wrap 自动换行，居中布局比 ListView 更适合少量按钮
-        alignment: WrapAlignment.center,
-        spacing: 8, // 按钮之间的间距
+      padding: const EdgeInsets.symmetric(vertical: 1.5),
+      child: Center(
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
           children: _availableCategories.map((category) {
             final isSelected = _selectedCategory == category;
 
