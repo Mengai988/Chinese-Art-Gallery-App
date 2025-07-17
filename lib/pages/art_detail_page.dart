@@ -185,29 +185,39 @@ class ArtDetailPage extends StatelessWidget {
           viewer = Listener(
             onPointerSignal: (event) {
               if (event is PointerScrollEvent) {
-                final scale = event.scrollDelta.dy > 0 ? 0.9 : 1.1;
-                
-                // Get the position of the mouse relative to the image
+                // 根据滚动方向设定缩放比例
+                double scaleDelta = event.scrollDelta.dy > 0 ? 0.9 : 1.1;
+
+                final currentScale = transformationController.value.getMaxScaleOnAxis();
+                final newScale = currentScale * scaleDelta;
+
+                // 设置最小和最大缩放比例
+                const minScale = 1.0;
+                const maxScale = 5.0;
+
+                // 如果已经达到极限，则不再缩放
+                if ((newScale < minScale && scaleDelta < 1) ||
+                    (newScale > maxScale && scaleDelta > 1)) {
+                  return;
+                }
+
                 final renderBox = context.findRenderObject() as RenderBox?;
                 if (renderBox == null) return;
-                
+
                 final offset = renderBox.globalToLocal(event.position);
-                
-                // Convert Vector3 translation to Offset
+
                 final translation = transformationController.value.getTranslation();
                 final translationOffset = Offset(translation.x, translation.y);
-                
-                // Calculate the focal point in the coordinate space of the image
-                final imageOffset = (offset - translationOffset) / 
-                                  transformationController.value.getMaxScaleOnAxis();
-                
-                // Apply the scale centered on the mouse position
+
+                final imageOffset = (offset - translationOffset) /
+                    transformationController.value.getMaxScaleOnAxis();
+
                 final newMatrix = Matrix4.identity()
                   ..translate(imageOffset.dx, imageOffset.dy)
-                  ..scale(scale)
+                  ..scale(scaleDelta)
                   ..translate(-imageOffset.dx, -imageOffset.dy)
                   ..multiply(transformationController.value);
-                
+
                 transformationController.value = newMatrix;
               }
             },
