@@ -121,15 +121,49 @@ class ArtDetailPage extends StatelessWidget {
       opaque: false,
       barrierDismissible: true,
       pageBuilder: (context, animation, secondaryAnimation) {
-        final TransformationController _transformationController = TransformationController();
+        final transformationController = TransformationController();
+        final focusNode = FocusNode();
+        Offset? lastFocalPoint;
 
         Widget viewer = Hero(
           tag: item.id,
           child: InteractiveViewer(
-            transformationController: _transformationController,
+            transformationController: transformationController,
             panEnabled: true,
             minScale: 1,
             maxScale: 5,
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            onInteractionStart: (details) {
+              if (details.pointerCount > 1) {
+                lastFocalPoint = null;
+              } else {
+                lastFocalPoint = details.focalPoint;
+              }
+            },
+            onInteractionUpdate: (details) {
+              if (details.pointerCount > 1) {
+                return;
+              }
+              
+              if (lastFocalPoint != null && details.scale != 1.0) {
+                // Convert Vector3 translation to Offset
+                final translation = transformationController.value.getTranslation();
+                final translationOffset = Offset(translation.x, translation.y);
+                
+                // Calculate the focal point in the coordinate space of the image
+                final offset = (lastFocalPoint! - translationOffset) / 
+                            transformationController.value.getMaxScaleOnAxis();
+                
+                // Apply the scale centered on the focal point
+                final newMatrix = Matrix4.identity()
+                  ..translate(offset.dx, offset.dy)
+                  ..scale(details.scale)
+                  ..translate(-offset.dx, -offset.dy)
+                  ..multiply(transformationController.value);
+                
+                transformationController.value = newMatrix;
+              }
+            },
             child: SizedBox.expand(
               child: Image.asset(
                 imagePath,
@@ -144,16 +178,37 @@ class ArtDetailPage extends StatelessWidget {
           ),
         );
 
-        // 桌面平台处理鼠标滚轮缩放
+        // Desktop platform mouse wheel zoom handling
         if (defaultTargetPlatform == TargetPlatform.macOS ||
             defaultTargetPlatform == TargetPlatform.linux ||
             defaultTargetPlatform == TargetPlatform.windows) {
           viewer = Listener(
             onPointerSignal: (event) {
               if (event is PointerScrollEvent) {
-                final zoom = event.scrollDelta.dy > 0 ? 0.9 : 1.1;
-                final matrix = _transformationController.value.clone()..scale(zoom);
-                _transformationController.value = matrix;
+                final scale = event.scrollDelta.dy > 0 ? 0.9 : 1.1;
+                
+                // Get the position of the mouse relative to the image
+                final renderBox = context.findRenderObject() as RenderBox?;
+                if (renderBox == null) return;
+                
+                final offset = renderBox.globalToLocal(event.position);
+                
+                // Convert Vector3 translation to Offset
+                final translation = transformationController.value.getTranslation();
+                final translationOffset = Offset(translation.x, translation.y);
+                
+                // Calculate the focal point in the coordinate space of the image
+                final imageOffset = (offset - translationOffset) / 
+                                  transformationController.value.getMaxScaleOnAxis();
+                
+                // Apply the scale centered on the mouse position
+                final newMatrix = Matrix4.identity()
+                  ..translate(imageOffset.dx, imageOffset.dy)
+                  ..scale(scale)
+                  ..translate(-imageOffset.dx, -imageOffset.dy)
+                  ..multiply(transformationController.value);
+                
+                transformationController.value = newMatrix;
               }
             },
             child: viewer,
@@ -163,7 +218,7 @@ class ArtDetailPage extends StatelessWidget {
         return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Scaffold(
-            backgroundColor: Colors.black.withOpacity(0.9),
+            backgroundColor: Color.lerp(Colors.black, Colors.black, 0.9)!, // Replaced withOpacity with lerp
             body: Stack(
               children: [
                 BackdropFilter(
@@ -178,7 +233,12 @@ class ArtDetailPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                viewer,
+                Center(
+                  child: Focus(
+                    focusNode: focusNode,
+                    child: viewer,
+                  ),
+                ),
               ],
             ),
           ),
