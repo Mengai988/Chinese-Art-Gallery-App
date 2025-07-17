@@ -4,7 +4,6 @@ import '../models/art_items.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 
-
 class ArtDetailPage extends StatelessWidget {
   final ArtItem item;
 
@@ -35,6 +34,10 @@ class ArtDetailPage extends StatelessWidget {
                 tag: item.id,
                 child: Container(
                   margin: const EdgeInsets.all(16),
+                  constraints: const BoxConstraints(
+                    maxHeight: 300,
+                    maxWidth: double.infinity,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
@@ -47,16 +50,14 @@ class ArtDetailPage extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: AspectRatio(
-                      aspectRatio: 1, // 替代固定 300x300
-                      child: Image.asset(
-                        item.thumbnailPath,
-                        fit: BoxFit.cover,
-                        errorBuilder: (ctx, error, stackTrace) => Container(
-                          color: Colors.grey[200],
-                          child: const Center(
-                            child: Icon(Icons.broken_image, size: 60),
-                          ),
+                    child: Image.asset(
+                      item.thumbnailPath,
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      errorBuilder: (ctx, error, stackTrace) => Container(
+                        color: Colors.grey[200],
+                        child: const Center(
+                          child: Icon(Icons.broken_image, size: 60),
                         ),
                       ),
                     ),
@@ -129,8 +130,7 @@ class ArtDetailPage extends StatelessWidget {
             panEnabled: true,
             minScale: 1,
             maxScale: 5,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+            child: SizedBox.expand(
               child: Image.asset(
                 imagePath,
                 fit: BoxFit.contain,
@@ -144,7 +144,7 @@ class ArtDetailPage extends StatelessWidget {
           ),
         );
 
-        // 桌面平台加 Listener 来处理鼠标滚轮缩放
+        // 桌面平台处理鼠标滚轮缩放
         if (defaultTargetPlatform == TargetPlatform.macOS ||
             defaultTargetPlatform == TargetPlatform.linux ||
             defaultTargetPlatform == TargetPlatform.windows) {
@@ -152,8 +152,7 @@ class ArtDetailPage extends StatelessWidget {
             onPointerSignal: (event) {
               if (event is PointerScrollEvent) {
                 final zoom = event.scrollDelta.dy > 0 ? 0.9 : 1.1;
-                final matrix = _transformationController.value.clone()
-                  ..scale(zoom);
+                final matrix = _transformationController.value.clone()..scale(zoom);
                 _transformationController.value = matrix;
               }
             },
@@ -164,14 +163,22 @@ class ArtDetailPage extends StatelessWidget {
         return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Scaffold(
-            backgroundColor: Colors.black.withOpacity(0.5),
+            backgroundColor: Colors.black.withOpacity(0.9),
             body: Stack(
               children: [
                 BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(color: Colors.black.withOpacity(0.5)),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.black87, Colors.black],
+                      ),
+                    ),
+                  ),
                 ),
-                Center(child: viewer),
+                viewer,
               ],
             ),
           ),
@@ -183,4 +190,3 @@ class ArtDetailPage extends StatelessWidget {
     );
   }
 }
-
